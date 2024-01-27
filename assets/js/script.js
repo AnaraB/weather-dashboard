@@ -1,6 +1,12 @@
+require('dotenv').config();
+const apiKey = process.env.API_KEY;
+if (!apiKey) {
+  console.error('API key is missing. Make sure it is set in your .env file.');
+  process.exit(1); // Exit the script if the API key is not available
+}
 
 // direct geocoding Api 
-var latAndLongQuery = "http://api.openweathermap.org/geo/1.0/direct?q={city name}&limit=5&appid={APIkey}";
+var latAndLongQuery = "http://api.openweathermap.org/geo/1.0/direct?q=London&limit=5&appid=" + apiKey;
 
 fetch(latAndLongQuery)
 .then(function(response){
@@ -13,4 +19,4 @@ fetch(latAndLongQuery)
 
 
 
-var weatherQuery = "api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid={APIkey}";
+// var weatherQuery = "api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid={APIkey}";
