@@ -1,11 +1,3 @@
-// import {config} from 'dotenv';
-// config();
-
-// const apiKey = process.env.API_KEY;
-// if (!apiKey) {
-//   console.error('API key is missing. Make sure it is set in your .env file.');
-//   process.exit(1); // Exit the script if the API key is not available
-// }
 
 
 var apiKey = "f649c2e69d098ef6b6fa60678a6a0ff2";
@@ -28,24 +20,24 @@ $('#search-button').on('click', function(event) {
     return response.json();
   })
   .then(function(data) {
+
+    if(data.length == 0){
+      $(".city-name").text("Sorry, there is no such city name in our data base");
+           
+      return
+    
+    }
      //get hold of lat and long of the entered city
-  
+
     lat = data[0].lat;
     lon = data[0].lon;
     city= data[0].name;
 
     weatherApi();
-
-    if(enteredCity !== city){
-     //var noSuchCityMessage = $("#enter-city").text("No such city");
-     //$(".input-group").append(noSuchCityMessage);
-    //  console.log("Sorry, there is no such city name in our data base");
-     $("#today").addClass('hide');
-    }
-   
+    renderCityButtons(city);
   })
 
-  renderCityButtons();
+
 
 })
 
@@ -61,11 +53,18 @@ function weatherApi(){
 
 }
 
+let  searchedCities = []
 
-function renderCityButtons(){
+function renderCityButtons(city){
+  $("#history").empty();
   $(".current-weather").empty();
-  let  searchedCities = []
-  searchedCities.push(city);
+
+  if(searchedCities.length === 0){
+    searchedCities.push(city);
+    return
+   } 
+ 
+   searchedCities.push(city);
 
   for (let i = 0; i < searchedCities.length; i++){
    
@@ -86,20 +85,20 @@ function renderCityButtons(){
 
 function displayTodaysWeather(data){
 
-  $("#city-name").text(city + " ( " + dayjs().format('DD/MM/YYYY') + " )");
-
+ 
   const temp = data.list[0].main.temp;
   const wind = data.list[0].wind.speed;
   const humidity = data.list[0].main.humidity;
-  //const  weatherPic = data.list.weather[0].icon;  
-  //console.log(weatherPic)
-  // const  weatherDescription = data.list.weather[0].description;
+  const  weatherPic = data.list[0].weather[0].icon;  
+  const  weatherDescription = data.list[0].weather[0].description;
 
   // Creating an element to hold the weather image icon
-  // var image = $("<img>")
-  // .attr("src", "https://openweathermap.org/img/wn/" + weatherPic + "@2x.png")
-  // .attr("alt", weatherDescription);
+  var image = $("<img>")
+  .attr("src", "https://openweathermap.org/img/wn/" + weatherPic + "@2x.png")
+  .attr("alt", weatherDescription);
 
+  $("#city-name").text(city + " ( " + dayjs().format('DD/MM/YYYY') + " )");
+  $("#city-name").append(image);
 
   // Creating an element to have the temp  displayed
   var temperatureToday = $("<p>").text("Temperature: " + temp + " C°");
@@ -108,13 +107,15 @@ function displayTodaysWeather(data){
   var windToday = $("<p>").text("Wind: " + wind + " KPH");
 
   // Creating an element to have the humidity displayed
-  var humidityToday = $("<p>").text("Wind: " + humidity + " %");
+  var humidityToday = $("<p>").text("Humidity: " + humidity + " %");
 
 
  // $(".card-body").append(image);
   $(".current-weather").append(temperatureToday);
   $(".current-weather").append(windToday);
   $(".current-weather").append(humidityToday);
+
+
 }
 
 
