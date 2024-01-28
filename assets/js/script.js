@@ -8,22 +8,20 @@
 // }
 
 
-
+var apiKey = "f649c2e69d098ef6b6fa60678a6a0ff2";
 
 //global variables
 let lat;
 let lon;
 let city;
-let  searchedCities = []
 
 
 $('#search-button').on('click', function(event) {
   event.preventDefault();
-  city = $('#enter-city').val().trim();
-  searchedCities.push(city);
+  var enteredCity = $('#enter-city').val().trim();
 
   // use direct geocoding Api to get lat and long of the city
-  var latAndLongQuery = "http://api.openweathermap.org/geo/1.0/direct?q=" + city + "&limit=5&appid=" + apiKey;
+  var latAndLongQuery = "http://api.openweathermap.org/geo/1.0/direct?q=" + enteredCity + "&limit=5&appid=" + apiKey;
   
   fetch(latAndLongQuery)
   .then(function(response){
@@ -31,33 +29,25 @@ $('#search-button').on('click', function(event) {
   })
   .then(function(data) {
      //get hold of lat and long of the entered city
+  
     lat = data[0].lat;
     lon = data[0].lon;
+    city= data[0].name;
 
     weatherApi();
 
+    if(enteredCity !== city){
+     //var noSuchCityMessage = $("#enter-city").text("No such city");
+     //$(".input-group").append(noSuchCityMessage);
+    //  console.log("Sorry, there is no such city name in our data base");
+     $("#today").addClass('hide');
+    }
    
   })
 
-  
   renderCityButtons();
 
 })
-
-
-function capitalizeCityLetter(city){
-
-const firstLetter = city.charAt(0)
-
-const firstLetterCap = firstLetter.toUpperCase()
-
-const remainingLetters = city.slice(1)
-
-const capitalizedWord = firstLetterCap + remainingLetters
-
-return capitalizedWord;
-
-}
 
 
 function weatherApi(){
@@ -69,16 +59,19 @@ function weatherApi(){
   })
   .then(displayTodaysWeather) 
 
-
 }
 
 
 function renderCityButtons(){
+  $(".current-weather").empty();
+  let  searchedCities = []
+  searchedCities.push(city);
+
   for (let i = 0; i < searchedCities.length; i++){
-     
+   
   //Dinamically generate buttons for each entered city
   var a = $("<button>");
-  a.addClass("btn btn-secondary city-btn");
+  a.addClass("btn btn-secondary city-btn mb-3");
   //adding a data-attribute 
   a.attr("data-name", searchedCities[i]);
   //providing the initial button text
@@ -89,19 +82,16 @@ function renderCityButtons(){
  
 }
 
+
+
 function displayTodaysWeather(data){
-  //console.log(data);
-  const cityName = capitalizeCityLetter(city);
 
-$("#city-name").text(cityName + " ( " + dayjs().format('DD/MM/YYYY') + " )");
+  $("#city-name").text(city + " ( " + dayjs().format('DD/MM/YYYY') + " )");
 
-
- 
-  console.log(data.city.name);
   const temp = data.list[0].main.temp;
   const wind = data.list[0].wind.speed;
   const humidity = data.list[0].main.humidity;
-  //const  weatherPic = data.list.weather.icon;  
+  //const  weatherPic = data.list.weather[0].icon;  
   //console.log(weatherPic)
   // const  weatherDescription = data.list.weather[0].description;
 
@@ -122,9 +112,9 @@ $("#city-name").text(cityName + " ( " + dayjs().format('DD/MM/YYYY') + " )");
 
 
  // $(".card-body").append(image);
-  $(".card-body").append(temperatureToday);
-  $(".card-body").append(windToday);
-  $(".card-body").append(humidityToday);
+  $(".current-weather").append(temperatureToday);
+  $(".current-weather").append(windToday);
+  $(".current-weather").append(humidityToday);
 }
 
 
