@@ -33,8 +33,14 @@ $('#search-button').on('click', function(event) {
     lon = data[0].lon;
     city= data[0].name;
 
+  //call fucntion to fetch weather info
     weatherApi();
-    renderCityButtons(city);
+    //call function to generate city buttons 
+    renderSearchButtons(city);
+
+    console.log(searchedCities);
+    //set LocaStorage
+    localStorage.setItem("search", JSON.stringify(searchedCities));
   })
 
 
@@ -49,21 +55,27 @@ function weatherApi(){
   .then(function(response){
     return response.json();
   })
-  .then(displayTodaysWeather) 
+  .then(function(data) {
+
+    displayTodaysWeather(data) // call funtion to display current day weather info
+    displayFiveDaysForecast(data);  // call funtion to display next 5 days weather info
+
+  })
 
 }
 
 let  searchedCities = []
 
-function renderCityButtons(city){
+function renderSearchButtons(city){
   $("#history").empty();
   $(".current-weather").empty();
-
+ 
+  //if searchedCities array is empty, do not generate an empty button
   if(searchedCities.length === 0){
     searchedCities.push(city);
     return
    } 
- 
+  
    searchedCities.push(city);
 
   for (let i = 0; i < searchedCities.length; i++){
@@ -84,6 +96,7 @@ function renderCityButtons(city){
 
 
 function displayTodaysWeather(data){
+  console.log(data);
 
  
   const temp = data.list[0].main.temp;
@@ -116,10 +129,41 @@ function displayTodaysWeather(data){
   $(".current-weather").append(humidityToday);
 
 
-}
+ }
 
 
 
-function diplayFiveDaysForecats(){
+function displayFiveDaysForecast(data){
 
-}
+    var forecastEls = $(".forecast-five").children();
+    for (let i = 0; i < forecastEls.length; i++) {
+        //forecastEls[i].text("");
+
+        //each forecast entry is spaced 8 hours apart
+        const forecastIndex = i * 8 + 4;
+        const forecastDate = dayjs(data.list[forecastIndex].dt * 1000);
+        const forecastDay = forecastDate.date();
+        const forecastMonth = forecastDate.month() + 1;
+        const forecastYear = forecastDate.year();
+
+          // Creating and append an element to display date
+         var date = $("<h3>");
+         date.text(forecastMonth + "/" + forecastDay + "/" + forecastYear);
+         date.addClass("mt-3 mb-0 forecast-date");
+         $(forecastEls[i]).append(date);
+         //create <p> for icon and <img> attr for url, and display them
+         const  weatherPic = data.list[forecastIndex].weather[0].icon;  
+         const  weatherDescription = data.list[forecastIndex].weather[0].description;
+         var pImage = $("<p>");
+          var image = $("<img>")
+          .attr("src", "https://openweathermap.org/img/wn/" + weatherPic + "@2x.png")
+          .attr("alt", weatherDescription);
+          pImage.append(image);
+          $(forecastEls[i]).append(pImage);
+
+
+    }
+
+ }
+
+
