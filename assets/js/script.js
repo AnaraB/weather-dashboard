@@ -1,5 +1,4 @@
 
-
 var apiKey = "f649c2e69d098ef6b6fa60678a6a0ff2";
 
 //global variables
@@ -64,6 +63,7 @@ function weatherApi(){
 
 }
 
+// initiate empty array to collect city arrays of all user inputs
 let  searchedCities = []
 
 function renderSearchButtons(city){
@@ -74,14 +74,12 @@ function renderSearchButtons(city){
   if(searchedCities.length === 0){
     searchedCities.push(city);
     return
-   } 
+  } 
   
-   searchedCities.push(city);
-
+  searchedCities.push(city);
   for (let i = 0; i < searchedCities.length; i++){
-   
   //Dinamically generate buttons for each entered city
-  var a = $("<button>");
+  var a = $("<button>").attr("type", "button");
   a.addClass("btn btn-secondary city-btn mb-3");
   //adding a data-attribute 
   a.attr("data-name", searchedCities[i]);
@@ -94,11 +92,10 @@ function renderSearchButtons(city){
 }
 
 
-
 function displayTodaysWeather(data){
-  console.log(data);
 
- 
+  $("#today-weather").addClass("border border-primary");
+
   const temp = data.list[0].main.temp;
   const wind = data.list[0].wind.speed;
   const humidity = data.list[0].main.humidity;
@@ -121,49 +118,60 @@ function displayTodaysWeather(data){
 
   // Creating an element to have the humidity displayed
   var humidityToday = $("<p>").text("Humidity: " + humidity + " %");
-
-
- // $(".card-body").append(image);
   $(".current-weather").append(temperatureToday);
   $(".current-weather").append(windToday);
   $(".current-weather").append(humidityToday);
 
 
- }
+}
 
 
 
 function displayFiveDaysForecast(data){
 
-    var forecastEls = $(".forecast-five").children();
-    for (let i = 0; i < forecastEls.length; i++) {
-        //forecastEls[i].text("");
+  var forecastEls = $(".forecast-five").children();
+  // Add background color blue to all selected elements
+  forecastEls.css("background-color", "#5072A7");
+  for (let i = 0; i < forecastEls.length; i++)  {
+      $(forecastEls[i]).empty();
 
-        //each forecast entry is spaced 8 hours apart
-        const forecastIndex = i * 8 + 4;
-        const forecastDate = dayjs(data.list[forecastIndex].dt * 1000);
-        const forecastDay = forecastDate.date();
-        const forecastMonth = forecastDate.month() + 1;
-        const forecastYear = forecastDate.year();
+      //each forecast entry is spaced 8 hours apart
+      const forecastIndex = i * 8 + 4;
+      const forecastDate = dayjs(data.list[forecastIndex].dt * 1000);
+      const forecastDay = forecastDate.date();
+      const forecastMonth = forecastDate.month() + 1;
+      const forecastYear = forecastDate.year();
 
-          // Creating and append an element to display date
-         var date = $("<h3>");
-         date.text(forecastMonth + "/" + forecastDay + "/" + forecastYear);
-         date.addClass("mt-3 mb-0 forecast-date");
-         $(forecastEls[i]).append(date);
-         //create <p> for icon and <img> attr for url, and display them
-         const  weatherPic = data.list[forecastIndex].weather[0].icon;  
-         const  weatherDescription = data.list[forecastIndex].weather[0].description;
-         var pImage = $("<p>");
-          var image = $("<img>")
-          .attr("src", "https://openweathermap.org/img/wn/" + weatherPic + "@2x.png")
-          .attr("alt", weatherDescription);
-          pImage.append(image);
-          $(forecastEls[i]).append(pImage);
+        // Creating and appendind an element to display date
+        var date = $("<h3>");
+        date.text(forecastMonth + "/" + forecastDay + "/" + forecastYear);
+        date.addClass("mt-3 mb-0 p-3 forecast-date");
+        $(forecastEls[i]).append(date);
+      
+        //required data pieces
+        const  weatherPic = data.list[forecastIndex].weather[0].icon;  
+        const  weatherDescription = data.list[forecastIndex].weather[0].description;
+        const temp = data.list[0].main.temp;
+        const wind = data.list[0].wind.speed;
+        const humidity = data.list[0].main.humidity;
+        
+        //create <p> for icon and <img> attr for url, and display them
+        var pImage = $("<p>");
+        var image = $("<img>")
+        .attr("src", "https://openweathermap.org/img/wn/" + weatherPic + "@2x.png")
+        .attr("alt", weatherDescription);
+        pImage.append(image);
+        $(forecastEls[i]).append(pImage);
+      //create <p> to display temp, wind and humidity info and append to divs
+        var temperature= $("<p>").text("Temperature: " + temp + " C°");
+        var windInfo = $("<p>").text("Wind: " + wind + " KPH");
+        var humidityinfo = $("<p>").text("Humidity: " + humidity + " %");
+        $(forecastEls[i]).append(temperature);
+        $(forecastEls[i]).append(windInfo);
+        $(forecastEls[i]).append(humidityinfo);
 
+  }
 
-    }
-
- }
+}
 
 
