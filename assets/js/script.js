@@ -1,6 +1,9 @@
 
 var apiKey = "f649c2e69d098ef6b6fa60678a6a0ff2";
 
+//get from localStorage if available otherwise return an empty array
+var searchedCities = JSON.parse(localStorage.getItem("search")) || [];
+
 //global variables
 let lat;
 let lon;
@@ -36,8 +39,6 @@ $('#search-button').on('click', function(event) {
     weatherApi();
     //call function to generate city buttons 
     renderSearchButtons(city);
-
-    console.log(searchedCities);
     //set LocaStorage
     localStorage.setItem("search", JSON.stringify(searchedCities));
   })
@@ -63,8 +64,7 @@ function weatherApi(){
 
 }
 
-// initiate empty array to collect city arrays of all user inputs
-let  searchedCities = []
+
 
 function renderSearchButtons(city){
   $("#history").empty();
@@ -79,14 +79,14 @@ function renderSearchButtons(city){
   searchedCities.push(city);
   for (let i = 0; i < searchedCities.length; i++){
   //Dinamically generate buttons for each entered city
-  var a = $("<button>").attr("type", "button");
-  a.addClass("btn btn-secondary city-btn mb-3");
+  var searchedItem = $("<button>").attr("type", "button");
+  searchedItem .addClass("btn btn-secondary city-btn mb-3");
   //adding a data-attribute 
-  a.attr("data-name", searchedCities[i]);
+  searchedItem .attr("data-name", searchedCities[i]);
   //providing the initial button text
-  a.text(searchedCities[i])
+  searchedItem .text(searchedCities[i])
   //adding the city button to the history div
-  $("#history").append(a);
+  $("#history").append(searchedItem );
   }
  
 }
@@ -175,3 +175,5 @@ function displayFiveDaysForecast(data){
 }
 
 
+//adding a click event listener to all elements with class of city-btn
+// $(document).on('click', ".city-btn", func);
