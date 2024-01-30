@@ -96,6 +96,7 @@ function displayTodaysWeather(data){
 }
 
 function displayFiveDaysForecast(data){
+  console.log(data);
 
   var forecastEls = $(".forecast-five").children();
   // Add background color blue to all selected elements
