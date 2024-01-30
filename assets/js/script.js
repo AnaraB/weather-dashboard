@@ -1,4 +1,4 @@
- // Assigning a unique API to a variable
+
 var apiKey = "f649c2e69d098ef6b6fa60678a6a0ff2";
 
 //get from localStorage if available otherwise return an empty array
@@ -8,17 +8,11 @@ var searchedCities = JSON.parse(localStorage.getItem("search")) || [];
 let lat;
 let lon;
 let city;
-//let clickedCity;  // get hold of data-name attr of dinamically generated city-btn
 
 
 $('#search-button').on('click', function(event) {
   event.preventDefault();
-  getCityCoords()
-
-})
-
-function getCityCoords(){
-  var enteredCity = $('#enter-city').val().trim() || city;
+  var enteredCity = $('#enter-city').val().trim();
 
   // use direct geocoding Api to get lat and long of the city
   var latAndLongQuery = "http://api.openweathermap.org/geo/1.0/direct?q=" + enteredCity + "&limit=5&appid=" + apiKey;
@@ -30,7 +24,8 @@ function getCityCoords(){
   .then(function(data) {
 
     if(data.length == 0){
-      $(".city-name").text("Sorry, there is no such city name in our data base");         
+      $(".city-name").text("Sorry, there is no such city name in our data base");
+           
       return
     
     }
@@ -39,17 +34,21 @@ function getCityCoords(){
     lat = data[0].lat;
     lon = data[0].lon;
     city= data[0].name;
+  
+   weatherApi();
 
-    weatherApi();
-
+    //call function to generate city buttons 
+    renderSearchButtons(city);
     //set LocaStorage
     localStorage.setItem("search", JSON.stringify(searchedCities));
   })
 
-}
+
+
+})
 
 // create func to fetch weather api, set default param null for requesting api first time
-function weatherApi(){
+function weatherApi(city = null){
 
   //use lat and lon coordinates to fetch weather info
   var weatherQuery = "http://api.openweathermap.org/data/2.5/forecast?units=metric&lat=" + lat + "&lon=" + lon + "&appid=" + apiKey;
@@ -63,11 +62,20 @@ function weatherApi(){
     displayFiveDaysForecast(data);  // call function to display next 5 days weather info
 
   })
- 
-      //call function to generate city buttons 
-      renderSearchButtons(city);
 
 }
+
+// function checkWeatherApi(){
+//       //set condition if searched city array is NOT epmty
+//       if(searchedCities > 0){
+//         //call function to fetch weather info
+//         weatherApi(city);
+//      } else { // if searched button was clicked first time and searchedCities is EMPTY call default para, city = 0
+//        weatherApi();
+//      }
+// }
+
+
 
 function renderSearchButtons(city){
   $("#history").empty();
@@ -91,15 +99,11 @@ function renderSearchButtons(city){
   //adding the city button to the history div
   $("#history").append(searchedItem );
   }
- . 
+ 
 }
 
 
-
-
 function displayTodaysWeather(data){
-  // Empty the content of .current-weather  before appending new information
-  $(".current-weather").empty();
 
   $("#today-weather").addClass("border border-primary");
 
@@ -117,8 +121,6 @@ function displayTodaysWeather(data){
   $("#city-name").text(city + " ( " + dayjs().format('DD/MM/YYYY') + " )");
   $("#city-name").append(image);
 
-
-
   // Creating an element to have the temp  displayed
   var temperatureToday = $("<p>").text("Temperature: " + temp + " C°");
 
@@ -133,6 +135,8 @@ function displayTodaysWeather(data){
 
 
 }
+
+
 
 function displayFiveDaysForecast(data){
 
@@ -183,16 +187,4 @@ function displayFiveDaysForecast(data){
 
 
 //adding a click event listener to all elements with class of city-btn
- $("#history").on('click',".city-btn", function() {
-  let clickedCity = $(this).data("name");
-  if(searchedCities.length > 0) {
-    getCityCoords()
-  }  
-
- });
-
-  // Clear button. Delete all city-buttons and clear localStorage
-  $("#clear-history").on("click", function () {
-    localStorage.clear();
-    $("#history").empty();
-})
+ $("#history").on('click',".city-btn", () => searchedCities.length > 0 ? weatherApi(city) : weatherApi());
