@@ -1,4 +1,4 @@
-
+ // Assigning a unique API to a variable
 var apiKey = "f649c2e69d098ef6b6fa60678a6a0ff2";
 
 //get from localStorage if available otherwise return an empty array
@@ -8,12 +8,17 @@ var searchedCities = JSON.parse(localStorage.getItem("search")) || [];
 let lat;
 let lon;
 let city;
-let clickedCity;
+//let clickedCity;  // get hold of data-name attr of dinamically generated city-btn
 
 
 $('#search-button').on('click', function(event) {
   event.preventDefault();
-  var enteredCity = $('#enter-city').val().trim();
+  getCityCoords()
+
+})
+
+function getCityCoords(){
+  var enteredCity = $('#enter-city').val().trim() || city;
 
   // use direct geocoding Api to get lat and long of the city
   var latAndLongQuery = "http://api.openweathermap.org/geo/1.0/direct?q=" + enteredCity + "&limit=5&appid=" + apiKey;
@@ -41,12 +46,10 @@ $('#search-button').on('click', function(event) {
     localStorage.setItem("search", JSON.stringify(searchedCities));
   })
 
-
-
-})
+}
 
 // create func to fetch weather api, set default param null for requesting api first time
-function weatherApi(clickedCity){
+function weatherApi(){
 
   //use lat and lon coordinates to fetch weather info
   var weatherQuery = "http://api.openweathermap.org/data/2.5/forecast?units=metric&lat=" + lat + "&lon=" + lon + "&appid=" + apiKey;
@@ -83,13 +86,12 @@ function renderSearchButtons(city){
   searchedItem .addClass("btn btn-secondary city-btn mb-3");
   //adding a data-attribute 
   searchedItem .attr("data-name", searchedCities[i]);
-  console.log(searchedCities);
   //providing the initial button text
   searchedItem .text(searchedCities[i])
   //adding the city button to the history div
   $("#history").append(searchedItem );
   }
- 
+ . 
 }
 
 
@@ -182,8 +184,15 @@ function displayFiveDaysForecast(data){
 
 //adding a click event listener to all elements with class of city-btn
  $("#history").on('click',".city-btn", function() {
-  clickedCity = $(this).data("name");
-  searchedCities.length > 0 ? weatherApi(clickedCity) : weatherApi()
+  let clickedCity = $(this).data("name");
+  if(searchedCities.length > 0) {
+    getCityCoords()
+  }  
 
  });
 
+  // Clear button. Delete all city-buttons and clear localStorage
+  $("#clear-history").on("click", function () {
+    localStorage.clear();
+    $("#history").empty();
+})
