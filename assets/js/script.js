@@ -2,26 +2,29 @@
 var apiKey = "f649c2e69d098ef6b6fa60678a6a0ff2";
 
 //get from localStorage if available otherwise return an empty array
-var searchedCities = JSON.parse(localStorage.getItem("search")) || [];
+//var searchedCities = JSON.parse(localStorage.getItem("search")) || [];
+var searchedCities = [];
 
-//global variables
-let lat;
-let lon;
+//global variable
 let city;
-//let clickedCity;  // get hold of data-name attr of dinamically generated city-btn
-
 
 $('#search-button').on('click', function(event) {
   event.preventDefault();
-  getCityCoords()
+  var enteredCity = $('#enter-city').val().trim();
+  getCityCoords(enteredCity);
+  searchedCities.push(enteredCity);
+  //set LocaStorage
+ localStorage.setItem("search", JSON.stringify(searchedCities));
+  
 
 })
 
-function getCityCoords(){
-  var enteredCity = $('#enter-city').val().trim() || city;
+function getCityCoords(enteredCity){
 
-  // use direct geocoding Api to get lat and long of the city
-  var latAndLongQuery = "http://api.openweathermap.org/geo/1.0/direct?q=" + enteredCity + "&limit=5&appid=" + apiKey;
+
+  // fetch current weather api for the city
+  var latAndLongQuery = "https://api.openweathermap.org/data/2.5/weather?units=metric&q=" + enteredCity + "&appid=" + apiKey;
+
   
   fetch(latAndLongQuery)
   .then(function(response){
@@ -29,48 +32,48 @@ function getCityCoords(){
   })
   .then(function(data) {
 
+        //get hold of lat and long of the entered city
+        let lat = data.coord.lat;
+        let lon = data.coord.lon;
+        city = data.name;
+    
+    console.log(data);
+    displayTodaysWeather(data) // call function to display current day weather info
+
     if(data.length == 0){
       $(".city-name").text("Sorry, there is no such city name in our data base");         
       return
     
     }
-     //get hold of lat and long of the entered city
+  
 
-    lat = data[0].lat;
-    lon = data[0].lon;
-    city= data[0].name;
+    //use lat and lon coordinates to fetch weather info for 5 days
+    var weatherQuery = "http://api.openweathermap.org/data/2.5/forecast?units=metric&lat=" + lat + "&lon=" + lon + "&appid=" + apiKey;
+    fetch(weatherQuery)
+    .then(function(response){
+      return response.json();
+    })
+    .then(function(data) {
 
-    weatherApi();
+    
+      displayFiveDaysForecast(data);  // call function to display next 5 days weather info
 
-    //set LocaStorage
-    localStorage.setItem("search", JSON.stringify(searchedCities));
-  })
-
-}
-
-// create func to fetch weather api, set default param null for requesting api first time
-function weatherApi(){
-
-  //use lat and lon coordinates to fetch weather info
-  var weatherQuery = "http://api.openweathermap.org/data/2.5/forecast?units=metric&lat=" + lat + "&lon=" + lon + "&appid=" + apiKey;
-  fetch(weatherQuery)
-  .then(function(response){
-    return response.json();
-  })
-  .then(function(data) {
-
-    displayTodaysWeather(data) // call function to display current day weather info
-    displayFiveDaysForecast(data);  // call function to display next 5 days weather info
-
-  })
+    })
  
       //call function to generate city buttons 
       renderSearchButtons(city);
 
+ 
+
+
+  })
+
 }
 
+
 function renderSearchButtons(city){
-  $("#history").empty();
+  console.log(city);
+  //$("#history").empty();
   $(".current-weather").empty();
  
   //if searchedCities array is empty, do not generate an empty button
@@ -80,41 +83,45 @@ function renderSearchButtons(city){
   } 
   
   searchedCities.push(city);
+
   for (let i = 0; i < searchedCities.length; i++){
-  //Dinamically generate buttons for each entered city
-  var searchedItem = $("<button>").attr("type", "button");
-  searchedItem .addClass("btn btn-secondary city-btn mb-3");
-  //adding a data-attribute 
-  searchedItem .attr("data-name", searchedCities[i]);
-  //providing the initial button text
-  searchedItem .text(searchedCities[i])
-  //adding the city button to the history div
-  $("#history").append(searchedItem );
-  }
- . 
+    //Dinamically generate buttons for each entered city
+    var searchedItem = $("<button>").attr("type", "button");
+    searchedItem .addClass("btn btn-secondary city-btn mb-3");
+    //adding a data-attribute 
+    searchedItem .attr("data-name", searchedCities[i]);
+    //providing the initial button text
+    searchedItem .text(searchedCities[i])
+    //adding the city button to the history div
+    $("#history").append(searchedItem );
+    }
+    // localStorage.setItem("search", JSON.stringify(searchedCities));
+
+ 
+
+
 }
 
 
 
 
 function displayTodaysWeather(data){
+  console.log(data);
   // Empty the content of .current-weather  before appending new information
   $(".current-weather").empty();
 
-  $("#today-weather").addClass("border border-primary");
-
-  const temp = data.list[0].main.temp;
-  const wind = data.list[0].wind.speed;
-  const humidity = data.list[0].main.humidity;
-  const  weatherPic = data.list[0].weather[0].icon;  
-  const  weatherDescription = data.list[0].weather[0].description;
+  const temp = data.main.temp;
+  const wind = data.wind.speed;
+  const humidity = data.main.humidity;
+  const  weatherPic = data.weather[0].icon;  
+  const  weatherDescription = data.weather[0].description;
 
   // Creating an element to hold the weather image icon
   var image = $("<img>")
   .attr("src", "https://openweathermap.org/img/wn/" + weatherPic + "@2x.png")
   .attr("alt", weatherDescription);
 
-  $("#city-name").text(city + " ( " + dayjs().format('DD/MM/YYYY') + " )");
+  $("#city-name").text(data.name + " ( " + dayjs().format('DD/MM/YYYY') + " )");
   $("#city-name").append(image);
 
 
