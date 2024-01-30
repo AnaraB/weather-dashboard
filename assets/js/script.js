@@ -10,7 +10,7 @@ let city;
 $('#search-button').on('click', function(event) {
   event.preventDefault();
   var enteredCity = $('#enter-city').val().trim();
-  getCityCoords(enteredCity);
+  getCityWeather(enteredCity);
   searchedCities.push(enteredCity);
   //set LocaStorage
  localStorage.setItem("search", JSON.stringify(searchedCities));
@@ -19,7 +19,7 @@ $('#search-button').on('click', function(event) {
 
 })
 
-function getCityCoords(enteredCity){
+function getCityWeather(enteredCity){
 
 
   // fetch current weather api for the city
@@ -37,14 +37,8 @@ function getCityCoords(enteredCity){
         let lon = data.coord.lon;
         city = data.name;
     
-    console.log(data);
-    displayTodaysWeather(data) // call function to display current day weather info
 
-    if(data.length == 0){
-      $(".city-name").text("Sorry, there is no such city name in our data base");         
-      return
-    
-    }
+    displayTodaysWeather(data) // call function to display current day weather info
   
 
     //use lat and lon coordinates to fetch weather info for 5 days
@@ -67,7 +61,7 @@ function getCityCoords(enteredCity){
 
 
 function displayTodaysWeather(data){
-  console.log(data);
+
   // Empty the content of .current-weather  before appending new information
   $(".current-weather").empty();
 
@@ -148,9 +142,7 @@ function displayFiveDaysForecast(data){
 
 }
 
-function renderSearchButtons(city){
-  console.log(city);
-  //$("#history").empty();
+function renderSearchButtons(){
   $(".current-weather").empty();
 
   for (let i = 0; i < searchedCities.length; i++){
@@ -168,18 +160,18 @@ function renderSearchButtons(city){
 
 }
 
-
-   //call function to generate city buttons 
-  //  renderSearchButtons();
-
- 
+ //call function to generate city buttons 
+renderSearchButtons();
+if (searchedCities.length > 0) {
+    getCityWeather(searchedCities[searchedCities.length - 1]);
+}
 
 
 //adding a click event listener to all elements with class of city-btn
  $("#history").on('click',".city-btn", function() {
   let clickedCity = $(this).data("name");
 
-    getCityCoords(clickedCity)
+    getCityWeather(clickedCity)
   
 
  });
@@ -188,4 +180,5 @@ function renderSearchButtons(city){
   $("#clear-history").on("click", function () {
     localStorage.clear();
     $("#history").empty();
+
 })

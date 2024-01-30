@@ -22,3 +22,9 @@ THEN  they are presented with a 5-day forecast that displays:
 
 
 When a user click on a city in the search history they are again presented with current and future conditions for that city
+------------------------------
+The following  image shows the web application's appearance
+
+
+
+
