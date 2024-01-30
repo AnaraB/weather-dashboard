@@ -34,9 +34,9 @@ $('#search-button').on('click', function(event) {
     lat = data[0].lat;
     lon = data[0].lon;
     city= data[0].name;
+  
+   weatherApi();
 
-  //call fucntion to fetch weather info
-    weatherApi();
     //call function to generate city buttons 
     renderSearchButtons(city);
     //set LocaStorage
@@ -47,8 +47,9 @@ $('#search-button').on('click', function(event) {
 
 })
 
+// create func to fetch weather api, set default param null for requesting api first time
+function weatherApi(city = null){
 
-function weatherApi(){
   //use lat and lon coordinates to fetch weather info
   var weatherQuery = "http://api.openweathermap.org/data/2.5/forecast?units=metric&lat=" + lat + "&lon=" + lon + "&appid=" + apiKey;
   fetch(weatherQuery)
@@ -57,12 +58,22 @@ function weatherApi(){
   })
   .then(function(data) {
 
-    displayTodaysWeather(data) // call funtion to display current day weather info
-    displayFiveDaysForecast(data);  // call funtion to display next 5 days weather info
+    displayTodaysWeather(data) // call function to display current day weather info
+    displayFiveDaysForecast(data);  // call function to display next 5 days weather info
 
   })
 
 }
+
+// function checkWeatherApi(){
+//       //set condition if searched city array is NOT epmty
+//       if(searchedCities > 0){
+//         //call function to fetch weather info
+//         weatherApi(city);
+//      } else { // if searched button was clicked first time and searchedCities is EMPTY call default para, city = 0
+//        weatherApi();
+//      }
+// }
 
 
 
@@ -144,7 +155,7 @@ function displayFiveDaysForecast(data){
 
         // Creating and appendind an element to display date
         var date = $("<h3>");
-        date.text(forecastMonth + "/" + forecastDay + "/" + forecastYear);
+        date.text(forecastDay + "/" + forecastMonth + "/" + forecastYear);
         date.addClass("mt-3 mb-0 p-3 forecast-date");
         $(forecastEls[i]).append(date);
       
@@ -176,4 +187,4 @@ function displayFiveDaysForecast(data){
 
 
 //adding a click event listener to all elements with class of city-btn
-// $(document).on('click', ".city-btn", func);
+ $("#history").on('click',".city-btn", () => searchedCities.length > 0 ? weatherApi(city) : weatherApi());
