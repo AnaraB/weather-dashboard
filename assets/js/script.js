@@ -8,6 +8,7 @@ var searchedCities = JSON.parse(localStorage.getItem("search")) || [];
 let lat;
 let lon;
 let city;
+let clickedCity;
 
 
 $('#search-button').on('click', function(event) {
@@ -24,8 +25,7 @@ $('#search-button').on('click', function(event) {
   .then(function(data) {
 
     if(data.length == 0){
-      $(".city-name").text("Sorry, there is no such city name in our data base");
-           
+      $(".city-name").text("Sorry, there is no such city name in our data base");         
       return
     
     }
@@ -34,11 +34,9 @@ $('#search-button').on('click', function(event) {
     lat = data[0].lat;
     lon = data[0].lon;
     city= data[0].name;
-  
-   weatherApi();
 
-    //call function to generate city buttons 
-    renderSearchButtons(city);
+    weatherApi();
+
     //set LocaStorage
     localStorage.setItem("search", JSON.stringify(searchedCities));
   })
@@ -48,7 +46,7 @@ $('#search-button').on('click', function(event) {
 })
 
 // create func to fetch weather api, set default param null for requesting api first time
-function weatherApi(city = null){
+function weatherApi(clickedCity){
 
   //use lat and lon coordinates to fetch weather info
   var weatherQuery = "http://api.openweathermap.org/data/2.5/forecast?units=metric&lat=" + lat + "&lon=" + lon + "&appid=" + apiKey;
@@ -62,20 +60,11 @@ function weatherApi(city = null){
     displayFiveDaysForecast(data);  // call function to display next 5 days weather info
 
   })
+ 
+      //call function to generate city buttons 
+      renderSearchButtons(city);
 
 }
-
-// function checkWeatherApi(){
-//       //set condition if searched city array is NOT epmty
-//       if(searchedCities > 0){
-//         //call function to fetch weather info
-//         weatherApi(city);
-//      } else { // if searched button was clicked first time and searchedCities is EMPTY call default para, city = 0
-//        weatherApi();
-//      }
-// }
-
-
 
 function renderSearchButtons(city){
   $("#history").empty();
@@ -94,6 +83,7 @@ function renderSearchButtons(city){
   searchedItem .addClass("btn btn-secondary city-btn mb-3");
   //adding a data-attribute 
   searchedItem .attr("data-name", searchedCities[i]);
+  console.log(searchedCities);
   //providing the initial button text
   searchedItem .text(searchedCities[i])
   //adding the city button to the history div
@@ -103,7 +93,11 @@ function renderSearchButtons(city){
 }
 
 
+
+
 function displayTodaysWeather(data){
+  // Empty the content of .current-weather  before appending new information
+  $(".current-weather").empty();
 
   $("#today-weather").addClass("border border-primary");
 
@@ -121,6 +115,8 @@ function displayTodaysWeather(data){
   $("#city-name").text(city + " ( " + dayjs().format('DD/MM/YYYY') + " )");
   $("#city-name").append(image);
 
+
+
   // Creating an element to have the temp  displayed
   var temperatureToday = $("<p>").text("Temperature: " + temp + " C°");
 
@@ -135,8 +131,6 @@ function displayTodaysWeather(data){
 
 
 }
-
-
 
 function displayFiveDaysForecast(data){
 
@@ -187,4 +181,9 @@ function displayFiveDaysForecast(data){
 
 
 //adding a click event listener to all elements with class of city-btn
- $("#history").on('click',".city-btn", () => searchedCities.length > 0 ? weatherApi(city) : weatherApi());
+ $("#history").on('click',".city-btn", function() {
+  clickedCity = $(this).data("name");
+  searchedCities.length > 0 ? weatherApi(clickedCity) : weatherApi()
+
+ });
+
