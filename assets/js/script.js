@@ -2,8 +2,7 @@
 var apiKey = "f649c2e69d098ef6b6fa60678a6a0ff2";
 
 //get from localStorage if available otherwise return an empty array
-//var searchedCities = JSON.parse(localStorage.getItem("search")) || [];
-var searchedCities = [];
+var searchedCities = JSON.parse(localStorage.getItem("search")) || [];
 
 //global variable
 let city;
@@ -15,6 +14,7 @@ $('#search-button').on('click', function(event) {
   searchedCities.push(enteredCity);
   //set LocaStorage
  localStorage.setItem("search", JSON.stringify(searchedCities));
+ renderSearchButtons();
   
 
 })
@@ -59,50 +59,11 @@ function getCityCoords(enteredCity){
       displayFiveDaysForecast(data);  // call function to display next 5 days weather info
 
     })
- 
-      //call function to generate city buttons 
-      renderSearchButtons(city);
-
- 
 
 
   })
 
 }
-
-
-function renderSearchButtons(city){
-  console.log(city);
-  //$("#history").empty();
-  $(".current-weather").empty();
- 
-  //if searchedCities array is empty, do not generate an empty button
-  if(searchedCities.length === 0){
-    searchedCities.push(city);
-    return
-  } 
-  
-  searchedCities.push(city);
-
-  for (let i = 0; i < searchedCities.length; i++){
-    //Dinamically generate buttons for each entered city
-    var searchedItem = $("<button>").attr("type", "button");
-    searchedItem .addClass("btn btn-secondary city-btn mb-3");
-    //adding a data-attribute 
-    searchedItem .attr("data-name", searchedCities[i]);
-    //providing the initial button text
-    searchedItem .text(searchedCities[i])
-    //adding the city button to the history div
-    $("#history").append(searchedItem );
-    }
-    // localStorage.setItem("search", JSON.stringify(searchedCities));
-
- 
-
-
-}
-
-
 
 
 function displayTodaysWeather(data){
@@ -137,7 +98,6 @@ function displayTodaysWeather(data){
   $(".current-weather").append(temperatureToday);
   $(".current-weather").append(windToday);
   $(".current-weather").append(humidityToday);
-
 
 }
 
@@ -188,13 +148,39 @@ function displayFiveDaysForecast(data){
 
 }
 
+function renderSearchButtons(city){
+  console.log(city);
+  //$("#history").empty();
+  $(".current-weather").empty();
+
+  for (let i = 0; i < searchedCities.length; i++){
+    //Dinamically generate buttons for each entered city
+    var searchedItem = $("<button>").attr("type", "button");
+    searchedItem.addClass("btn btn-secondary city-btn mb-3");
+    //adding a data-attribute 
+    searchedItem.attr("data-name", searchedCities[i]);
+    //providing the initial button text
+    searchedItem.text(searchedCities[i])
+    // searchedItem.on
+    //adding the city button to the history div
+    $("#history").append(searchedItem );
+    }
+
+}
+
+
+   //call function to generate city buttons 
+  //  renderSearchButtons();
+
+ 
+
 
 //adding a click event listener to all elements with class of city-btn
  $("#history").on('click',".city-btn", function() {
   let clickedCity = $(this).data("name");
-  if(searchedCities.length > 0) {
-    getCityCoords()
-  }  
+
+    getCityCoords(clickedCity)
+  
 
  });
 
