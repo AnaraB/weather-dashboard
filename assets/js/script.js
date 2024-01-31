@@ -4,14 +4,18 @@ var apiKey = "f649c2e69d098ef6b6fa60678a6a0ff2";
 //get from localStorage if available otherwise return an empty array
 var searchedCities = JSON.parse(localStorage.getItem("search")) || [];
 
-//global variable
-let city;
 
 $('#search-button').on('click', function(event) {
   event.preventDefault();
   var enteredCity = $('#enter-city').val().trim();
-  getCityWeather(enteredCity);
-  searchedCities.push(enteredCity);
+  //make sure that all city names are stored with capital letters
+  var  cityName = capitalizeFirstLetter(enteredCity)
+  getCityWeather(cityName);
+  // if array doesn't contain searching city than add it to the array  
+  if(!searchedCities.includes(cityName)){
+    searchedCities.push(cityName);
+  }
+
   //set LocaStorage
  localStorage.setItem("search", JSON.stringify(searchedCities));
  renderSearchButtons();
@@ -27,15 +31,24 @@ function getCityWeather(enteredCity){
 
   
   fetch(latAndLongQuery)
-  .then(function(response){
-    return response.json();
+  .then((response) => {
+    if(response.ok){
+      return response.json();
+    }
+    throw new Error ("No data for this city. Please check city name spelling");
+
   })
-  .then(function(data) {
+  .then((data) => {
 
         //get hold of lat and long of the entered city
         let lat = data.coord.lat;
         let lon = data.coord.lon;
-        city = data.name;
+        let  city = data.name;
+
+        if(!city === enteredCity){
+          return
+
+        }
     
 
     displayTodaysWeather(data) // call function to display current day weather info
@@ -55,6 +68,10 @@ function getCityWeather(enteredCity){
     })
 
 
+  })
+
+  .catch((error) => {
+    console.log(error);
   })
 
 }
@@ -96,7 +113,6 @@ function displayTodaysWeather(data){
 }
 
 function displayFiveDaysForecast(data){
-  console.log(data);
 
   var forecastEls = $(".forecast-five").children();
   // Add background color blue to all selected elements
@@ -147,6 +163,9 @@ function renderSearchButtons(){
   $(".current-weather").empty();
 
   for (let i = 0; i < searchedCities.length; i++){
+
+    // Check if the city button already exists in the DOM
+    if ($(".city-btn[data-name='" + searchedCities[i] + "']").length === 0) {
     //Dinamically generate buttons for each entered city
     var searchedItem = $("<button>").attr("type", "button");
     searchedItem.addClass("btn btn-secondary city-btn mb-3");
@@ -157,14 +176,23 @@ function renderSearchButtons(){
     //adding the city button to the history div
     $("#history").append(searchedItem );
     }
-
+  }
 }
 
+//general function to capitalize city input
+function capitalizeFirstLetter(word) {
+  if (typeof word !== 'string' || word.length === 0) {
+    // Return empty string or handle other data types as needed
+    return word;
+  }
+
+  return word.charAt(0).toUpperCase() + word.slice(1);
+}
  //call function to generate city buttons 
-renderSearchButtons();
-if (searchedCities.length > 0) {
-    getCityWeather(searchedCities[searchedCities.length - 1]);
-}
+// renderSearchButtons();
+// if (searchedCities.length > 0) {
+//     getCityWeather(searchedCities[searchedCities.length - 1]);
+// }
 
 
 //adding a click event listener to all elements with class of city-btn
