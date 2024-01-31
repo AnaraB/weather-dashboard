@@ -39,6 +39,9 @@ function getCityWeather(enteredCity){
 
   })
   .then((data) => {
+    
+       $('.five-day-title').remove('d-none');
+       
 
         //get hold of lat and long of the entered city
         let lat = data.coord.lat;
@@ -78,6 +81,7 @@ function getCityWeather(enteredCity){
 
 
 function displayTodaysWeather(data){
+
 
   // Empty the content of .current-weather  before appending new information
   $(".current-weather").empty();
@@ -188,12 +192,6 @@ function capitalizeFirstLetter(word) {
 
   return word.charAt(0).toUpperCase() + word.slice(1);
 }
- //call function to generate city buttons 
-// renderSearchButtons();
-// if (searchedCities.length > 0) {
-//     getCityWeather(searchedCities[searchedCities.length - 1]);
-// }
-
 
 //adding a click event listener to all elements with class of city-btn
  $("#history").on('click',".city-btn", function() {
