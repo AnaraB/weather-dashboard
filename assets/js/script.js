@@ -42,7 +42,7 @@ function getCityWeather(enteredCity){
   
 
     //use lat and lon coordinates to fetch weather info for 5 days
-    var weatherQuery = "http://api.openweathermap.org/data/2.5/forecast?units=metric&lat=" + lat + "&lon=" + lon + "&appid=" + apiKey;
+    var weatherQuery = "https://api.openweathermap.org/data/2.5/forecast?units=metric&lat=" + lat + "&lon=" + lon + "&appid=" + apiKey;
     fetch(weatherQuery)
     .then(function(response){
       return response.json();
@@ -120,9 +120,9 @@ function displayFiveDaysForecast(data){
         //required data pieces
         const  weatherPic = data.list[forecastIndex].weather[0].icon;  
         const  weatherDescription = data.list[forecastIndex].weather[0].description;
-        const temp = data.list[0].main.temp;
-        const wind = data.list[0].wind.speed;
-        const humidity = data.list[0].main.humidity;
+        const temp = data.list[forecastIndex].main.temp;
+        const wind = data.list[forecastIndex].wind.speed;
+        const humidity = data.list[forecastIndex].main.humidity;
         
         //create <p> for icon and <img> attr for url, and display them
         var pImage = $("<p>");
@@ -154,7 +154,6 @@ function renderSearchButtons(){
     searchedItem.attr("data-name", searchedCities[i]);
     //providing the initial button text
     searchedItem.text(searchedCities[i])
-    // searchedItem.on
     //adding the city button to the history div
     $("#history").append(searchedItem );
     }
